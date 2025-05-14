@@ -1,0 +1,35 @@
+org="Glomeromycotina"
+dataset="Merckx"
+
+dataset="Barret"
+
+dataset="Dowie"
+
+dataset="Otero"
+
+dataset="Arifin"
+
+dataset="Hayward"
+
+dataset="Shefferson"
+dataset="Shefferson_Ceratobasidiaceae"
+
+dataset="Toju"
+org="Sebacinales"
+org="Agaricales"
+
+org="plant"
+org="fungi"
+path="C:/fantine/Nextcloud/Immex_2023/data/data_"$dataset
+cd $path
+
+# Mafft pour aligner
+
+C:/Users/bodin/mafft-7.520-win64-signed/mafft-win/mafft.bat --globalpair $path"/sequences_"$dataset"_"$org".fasta" > "alignment_"$dataset"_"$org".fasta"
+
+# TrimAl pour nettoyer l'alignement
+C:/Users/bodin/trimal.v1.2rev59/trimAl/bin/trimal.exe -in "alignment_"$dataset"_"$org".fasta" -out "alignment_"$dataset"_"$org"_trimal.fasta" -automated1
+
+# Iqtree
+C:/Users/bodin/iqtree-2.2.2.6-Windows/iqtree-2.2.2.6-Windows/bin/iqtree2.exe -s "alignment_"$dataset"_"$org"_trimal.fasta" -redo -alrt 1000 -B 1000 -m TEST
+

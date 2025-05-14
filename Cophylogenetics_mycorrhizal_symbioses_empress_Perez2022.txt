@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+dataset=La_Reunion
+cd C:/fantine/Nextcloud/Immex_2023/data/data_"$dataset"
+
+
+for fungi in "Cantharellales" "Glomeromycotina" "Helotiales" "Mucoromycotina" "Sebacinales"
+do
+	for site in "Grand brûlé" "Plaine des palmistes" "Dimetile"
+	do
+
+		python C:/Users/bodin/empress/empress/empress_cli.py p-value tree_hosts_empress_"$dataset"_"$fungi"_"$site".tre tree_parasites_empress_"$dataset"_"$fungi"_"$site".tre links_empress_"$dataset"_"$fungi"_"$site".txt -d 4 -t 1 -l 1 --n-samples 1000 --outfile pvalue_"$dataset"_"$fungi"_"$site"_output.svg
+
+		python C:/Users/bodin/empress/empress/empress_cli.py reconcile tree_hosts_empress_"$dataset"_"$fungi"_"$site".tre tree_parasites_empress_"$dataset"_"$fungi"_"$site".tre links_empress_"$dataset"_"$fungi"_"$site".txt -d 4 -t 1 -l 1 --csv recon_"$dataset"_"$fungi"_"$site"_output.csv
+
+	done
+done
