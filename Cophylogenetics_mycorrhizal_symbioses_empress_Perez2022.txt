@@ -15,3 +15,17 @@ do
 
 	done
 done
+
+# With bifurcations
+
+for fungi in "Cantharellales" "Glomeromycotina" "Helotiales" "Mucoromycotina" "Sebacinales"
+do
+	for site in "Grand brûlé" "Plaine des palmistes" "Dimetile"
+	do
+
+		python C:/Users/bodin/empress/empress/empress_cli.py p-value tree_hosts_bifurcations_empress_"$dataset"_"$fungi"_"$site"_1.tre tree_parasites_bifurcations_empress_"$dataset"_"$fungi"_"$site"_1.tre links_bifurcations_empress_"$dataset"_"$fungi"_"$site"_1.txt -d 4 -t 1 -l 1 --n-samples 1000 --outfile pvalue_"$dataset"_"$fungi"_"$site"_bifurcations_output.svg
+
+		python C:/Users/bodin/empress/empress/empress_cli.py reconcile tree_hosts_bifurcations_empress_"$dataset"_"$fungi"_"$site"_1.tre tree_parasites_bifurcations_empress_"$dataset"_"$fungi"_"$site"_1.tre links_bifurcations_empress_"$dataset"_"$fungi"_"$site"_1.txt -d 4 -t 1 -l 1 --csv recon_"$dataset"_"$fungi"_"$site"_bifurcations_output.csv
+
+	done
+done

@@ -60,3 +60,43 @@ l=1
 python C:/Users/bodin/empress/empress/empress_cli.py p-value "tree_hosts_empress_"$dataset".tre" "tree_parasites_empress_"$dataset".tre" "links_empress_"$dataset".txt" -d $d -t $t -l $l --n-samples 1000 --outfile "pvalue_"$dataset"_d"$d"_t"$t"_l"$l"_output.svg"
 
 python C:/Users/bodin/empress/empress/empress_cli.py reconcile "tree_hosts_empress_"$dataset".tre" "tree_parasites_empress_"$dataset".tre" "links_empress_"$dataset".txt" -d $d -t $t -l $l --csv "recon_"$dataset"_d"$d"_t"$t"_l"$l"_output.csv"
+
+
+
+# With bifurcations
+
+d=1
+t=1
+l=1
+
+python C:/Users/bodin/empress/empress/empress_cli.py p-value "tree_hosts_bifurcations_empress_"$dataset"_1.tre" "tree_parasites_bifurcations_empress_"$dataset"_1.tre" "links_bifurcations_empress_"$dataset"_1.txt" -d $d -t $t -l $l --n-samples 1000 --outfile "pvalue_"$dataset"_d"$d"_t"$t"_l"$l"_bifurcations_output.svg"
+
+python C:/Users/bodin/empress/empress/empress_cli.py reconcile "tree_hosts_bifurcations_empress_"$dataset"_1.tre" "tree_parasites_bifurcations_empress_"$dataset"_1.tre" "links_bifurcations_empress_"$dataset"_1.txt" -d $d -t $t -l $l --csv "recon_"$dataset"_d"$d"_t"$t"_l"$l"_bifurcations_output.csv"
+
+d=4
+t=1
+l=1
+python C:/Users/bodin/empress/empress/empress_cli.py p-value "tree_hosts_bifurcations_empress_"$dataset"_1.tre" "tree_parasites_bifurcations_empress_"$dataset"_1.tre" "links_bifurcations_empress_"$dataset"_1.txt" -d $d -t $t -l $l --n-samples 1000 --outfile "pvalue_"$dataset"_d"$d"_t"$t"_l"$l"_bifurcations_output.svg"
+
+python C:/Users/bodin/empress/empress/empress_cli.py reconcile "tree_hosts_bifurcations_empress_"$dataset"_1.tre" "tree_parasites_bifurcations_empress_"$dataset"_1.tre" "links_bifurcations_empress_"$dataset"_1.txt" -d $d -t $t -l $l --csv "recon_"$dataset"_d"$d"_t"$t"_l"$l"_bifurcations_output.csv"
+
+d=2
+t=1
+l=2
+python C:/Users/bodin/empress/empress/empress_cli.py p-value "tree_hosts_bifurcations_empress_"$dataset"_1.tre" "tree_parasites_bifurcations_empress_"$dataset"_1.tre" "links_bifurcations_empress_"$dataset"_1.txt" -d $d -t $t -l $l --n-samples 1000 --outfile "pvalue_"$dataset"_d"$d"_t"$t"_l"$l"_bifurcations_output.svg"
+
+python C:/Users/bodin/empress/empress/empress_cli.py reconcile "tree_hosts_bifurcations_empress_"$dataset"_1.tre" "tree_parasites_bifurcations_empress_"$dataset"_1.tre" "links_bifurcations_empress_"$dataset"_1.txt" -d $d -t $t -l $l --csv "recon_"$dataset"_d"$d"_t"$t"_l"$l"_bifurcations_output.csv"
+
+d=4
+t=2
+l=1
+python C:/Users/bodin/empress/empress/empress_cli.py p-value "tree_hosts_bifurcations_empress_"$dataset"_1.tre" "tree_parasites_bifurcations_empress_"$dataset"_1.tre" "links_bifurcations_empress_"$dataset"_1.txt" -d $d -t $t -l $l --n-samples 1000 --outfile "pvalue_"$dataset"_d"$d"_t"$t"_l"$l"_bifurcations_output.svg"
+
+python C:/Users/bodin/empress/empress/empress_cli.py reconcile "tree_hosts_bifurcations_empress_"$dataset"_1.tre" "tree_parasites_bifurcations_empress_"$dataset"_1.tre" "links_bifurcations_empress_"$dataset"_1.txt" -d $d -t $t -l $l --csv "recon_"$dataset"_d"$d"_t"$t"_l"$l"_bifurcations_output.csv"
+
+d=2
+t=3
+l=1
+python C:/Users/bodin/empress/empress/empress_cli.py p-value "tree_hosts_bifurcations_empress_"$dataset"_1.tre" "tree_parasites_bifurcations_empress_"$dataset"_1.tre" "links_bifurcations_empress_"$dataset"_1.txt" -d $d -t $t -l $l --n-samples 1000 --outfile "pvalue_"$dataset"_d"$d"_t"$t"_l"$l"_bifurcations_output.svg"
+
+python C:/Users/bodin/empress/empress/empress_cli.py reconcile "tree_hosts_bifurcations_empress_"$dataset"_1.tre" "tree_parasites_bifurcations_empress_"$dataset"_1.tre" "links_bifurcations_empress_"$dataset"_1.txt" -d $d -t $t -l $l --csv "recon_"$dataset"_d"$d"_t"$t"_l"$l"_bifurcations_output.csv"

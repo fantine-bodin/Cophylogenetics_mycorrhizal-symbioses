@@ -12,6 +12,7 @@ setwd(paste0("C:/fantine/Nextcloud/Immex_2023/data/data_",dataset))
 
 library(ape)
 library(paco)
+library(phytools)
 
 
 ###### Step 1 : Data ######
@@ -64,6 +65,9 @@ colnames(res) <- c("p-value Parafit","p-value Paco","Rcarré Paco")
 write.table(res,paste0("C:/fantine/Nextcloud/Immex_2023/results/GlobalFit_",dataset,".csv"),sep=";",row.names=FALSE,quote=FALSE)
 
 ##### Step 3 : before empress #####
+
+# Problem: polytomies are not supported by eMPRess
+## Approach n°1 : pick one interaction at random or select the most abundant interaction
 network <- t(network)
 list_links <- reshape2::melt(as.matrix(network)) # Var1 corresponds to symbionts, Var2 to hosts
 list_links <- list_links[list_links$value>0,] # remove no interaction
@@ -75,6 +79,7 @@ for (symbiont in unique(list_links$Var1)){
 }
 
 list_links <- list_links[list_links$value>0,] # remove no interaction
+
 
 #creation of table of links
 write.table(paste0(list_links$Var1,":", list_links$Var2), paste0("links_empress_", dataset,".txt"), col.names=F, row.names=F, quote=F)
@@ -89,10 +94,48 @@ tree_parasites_interact$node.label <- NULL
 tree_parasites_interact <- multi2di(tree_parasites_interact)
 write.tree(tree_parasites_interact, paste0("tree_parasites_empress_", dataset,".tre"))
 
+
+## Approach n°2 : randomly simulate bifurcating sub-trees
+
+# network <- t(network) # we need fungi in columns and plants in rows
+position <- min(c(0.001, fungi_tree$edge.length))
+
+num_duplicate <- 0
+while (!all(colSums(network)==1)){
+  ind_species <- which(colSums(network)>1)[sample(length(which(colSums(network)>1)), size=1)]
+  species <- colnames(network)[ind_species]
+  num_duplicate <- num_duplicate + 1
+  
+  network <- cbind(network, rep(0, nrow(network)))
+  colnames(network)[ncol(network)] <- paste0("duplicate_",num_duplicate)
+  list_index <- which(network[,species]>0)
+  index <- list_index[sample(length(list_index),size=1)]
+  network[index, ncol(network)] <- 1
+  network[index, species] <- 0
+  
+  fungi_tree <- bind.tip(fungi_tree, tip.label=paste0("duplicate_",num_duplicate), edge.length=0.001, where=which(fungi_tree$tip.label==species), position=position)
+  
+}
+
+if (!is.ultrametric(fungi_tree)) fungi_tree <- force.ultrametric(fungi_tree, method="extend")
+
+list_links <- reshape2::melt(as.matrix(network))
+list_links <- list_links[list_links$value>0,]
+
+write.table(paste0(list_links$Var2,":", list_links$Var1), paste0("links_bifurcations_empress_", dataset, "_", seed, ".txt"), col.names=F, row.names=F, quote=F)
+fungi_tree$node.label <- NULL
+fungi_tree <- multi2di(fungi_tree)
+write.tree(fungi_tree, paste0("tree_parasites_bifurcations_empress_", dataset, "_", seed, ".tre"))
+plant_tree$node.label <- NULL
+plant_tree <- multi2di(plant_tree)
+write.tree(plant_tree, paste0("tree_hosts_bifurcations_empress_", dataset, "_", seed, ".tre"))
+
 ##### Step 4 : empress #####
 #cf code bash empress
 
 ##### Step 5 : using empress data #####
+bifurcation <- TRUE
+suffix <- if (bifurcation) "_bifurcations" else ""
 empress=data.frame()
 
 parameters<-data.frame()
@@ -105,20 +148,21 @@ for (i in 1:5) {
   l=parameters[i,3]
   costs=paste0("d",d,"_t",t,"_l",l)
   
-  reconciliation <- read.table(paste0("C:/fantine/Nextcloud/Immex_2023/data/data_",dataset,"/recon_",dataset,"_",costs,"_output.csv"),sep=",")
-  cospeciation <- length(reconciliation$V3[reconciliation$V3=="Cospeciation"])/length(reconciliation$V3[reconciliation$V3=="Transfer"]) #indique si l'on a plus d'évenements de co-speciation que de tranferts
+  reconciliation <- read.table(paste0("C:/fantine/Nextcloud/Immex_2023/data/data_",dataset,"/recon_",dataset,"_",costs,suffix,"_output.csv"),sep=",")
+  cospeciation <- length(reconciliation$V3[reconciliation$V3=="Cospeciation"])/length(reconciliation$V3[reconciliation$V3=="Transfer"]) #indicate if we have more co-speciation events than transfer events
   
-  graph <- read.table(paste0("C:/fantine/Nextcloud/Immex_2023/data/data_",dataset,"/pvalue_",dataset,"_",costs,"_output.svg"), comment.char = "", fill=TRUE, sep=";")
-  pvalue_empress <- graph$V1[grep("p-value", graph$V1)] #isole la ligne du doc avec la pvalue
+  graph <- read.table(paste0("C:/fantine/Nextcloud/Immex_2023/data/data_",dataset,"/pvalue_",dataset,"_",costs,suffix,"_output.svg"), comment.char = "", fill=TRUE, sep=";")
+  pvalue_empress <- graph$V1[grep("p-value", graph$V1)] #isolate the row of the document with the p-value
   pvalue_empress <- gsub("    <!-- p-value = ", "", pvalue_empress)
-  pvalue_empress <- as.numeric(gsub(" -->", "", pvalue_empress)) #isole la pvalue
+  pvalue_empress <- as.numeric(gsub(" -->", "", pvalue_empress)) #isolate the p-value
   
   
   empress <- rbind(empress,c(costs,cospeciation ,pvalue_empress))
   colnames(empress) <- c("Costs","Ratio cospeciation / transfer events","P-value")
 }
 
-write.table(empress,paste0("C:/fantine/Nextcloud/Immex_2023/results/Empress_",dataset,".csv"),sep=";",row.names=FALSE,quote=FALSE)
+write.table(empress,paste0("C:/fantine/Nextcloud/Immex_2023/results/Empress_",dataset,suffix,".csv"),sep=";",row.names=FALSE,quote=FALSE)
+
 
 ##### Step 6 : Representation of network ######
 
@@ -272,6 +316,7 @@ name_plant_tree=paste0("alignment_",dataset,"_Afrothismia_trimal.fasta.treefile"
 dataset="global_scale"
 name_fungi_tree="tree_VT_18S_barcode_PB_LN_GTR_constrained.tre"
 name_plant_tree="plant_tree_phylomatic_zanne_grafted_familly.tre"
+fungi_tree <- read.nexus(name_fungi_tree)
 name_network="network_all.csv"
 # trees have roots already
 # too much time for a simple computer
@@ -518,6 +563,7 @@ name_fungi_tree="alignment_Arifin_fungi_trimal.fasta.treefile"
 fungi_outgroup="OTU_4" ## !!! do not delete it, it is not really the outgroup !!!
 
 ## A special Step 3 before empress : Beware, here there are more plants than fungi so we chose to consider plants as symbionts and fungi as host !
+## Approach n°1 : pick one interaction at random
 list_links <- reshape2::melt(as.matrix(network)) # Var1 corresponds to symbionts, Var2 to hosts
 list_links <- list_links[list_links$value>0,] # remove no interaction
 
@@ -537,6 +583,43 @@ tree_parasites_interact <- drop.tip(plant_tree, tip=plant_tree$tip.label[which(!
 tree_parasites_interact$node.label <- NULL
 tree_parasites_interact <- multi2di(tree_parasites_interact)
 write.tree(tree_parasites_interact, paste0("tree_parasites_empress_", dataset,".tre"))
+
+
+## Approach n°2 : randomly simulate bifurcating sub-trees
+seed<-1
+network <- t(network) # we need plant in columns and fungi in rows
+position <- min(c(0.001, plant_tree$edge.length))
+
+num_duplicate <- 0
+while (!all(colSums(network)==1)){
+  ind_species <- which(colSums(network)>1)[sample(length(which(colSums(network)>1)), size=1)]
+  species <- colnames(network)[ind_species]
+  num_duplicate <- num_duplicate + 1
+  
+  network <- cbind(network, rep(0, nrow(network)))
+  colnames(network)[ncol(network)] <- paste0("duplicate_",num_duplicate)
+  list_index <- which(network[,species]>0)
+  index <- list_index[sample(length(list_index),size=1)]
+  network[index, ncol(network)] <- 1
+  network[index, species] <- 0
+  
+  plant_tree <- bind.tip(plant_tree, tip.label=paste0("duplicate_",num_duplicate), edge.length=0.001, where=which(plant_tree$tip.label==species), position=position)
+  
+}
+
+if (!is.ultrametric(plant_tree)) plant_tree <- force.ultrametric(plant_tree, method="extend")
+
+list_links <- reshape2::melt(as.matrix(network))
+list_links <- list_links[list_links$value>0,]
+
+write.table(paste0(list_links$Var2,":", list_links$Var1), paste0("links_bifurcations_empress_", dataset, "_", seed, ".txt"), col.names=F, row.names=F, quote=F)
+fungi_tree$node.label <- NULL
+fungi_tree <- multi2di(fungi_tree)
+write.tree(fungi_tree, paste0("tree_hosts_bifurcations_empress_", dataset, "_", seed, ".tre"))
+plant_tree$node.label <- NULL
+plant_tree <- multi2di(plant_tree)
+write.tree(plant_tree, paste0("tree_parasites_bifurcations_empress_", dataset, "_", seed, ".tre"))
+
 
 ##### Script Hayward #####
 dataset="Hayward"
@@ -630,7 +713,7 @@ for (i in c("HM141077","HM151402","AJ539519","AF366896")){
 # build plant tree with V.Phylomaker2 : build table of plants and build tree
 library("V.PhyloMaker2")
 plant_list <- read.csv(paste0("GenbankAccessions_",dataset,"_plant.csv"),sep=" ", header=F)
-plant_list$V1 <- paste0(species_list$V2," ",species_list$V3)
+plant_list$V1 <- paste0(plant_list$V2," ",plant_list$V3)
 plant_list$V3 <- "Orchidaceae"
 plant_list <- plant_list[, 1:3]
 colnames(plant_list) <- c("species","genus","family")
@@ -739,7 +822,6 @@ for (i in fungi_tree$tip.label){
 # delete fungi which are not in the network
 
 # plant tree
-library(phytools)
 set.seed(1)
 plant_tree <- pbtree(n=4,tip.label=c("N.fusca","N.cliffortioides","N.solandri","N.menziesii"))
 plot(plant_tree)
@@ -851,9 +933,13 @@ for (j in colnames(network)) {
   }
 }
 network[network>0] <- 1
+
+
 dataset <- paste0("Toju_",fungi)
 
 # Empress
+bifurcation <- TRUE
+suffix <- if (bifurcation) "_bifurcations" else ""
 fungi=c("Helotiales","Sebacinales","Agaricales")
 dataset="Toju"
 for (order in fungi){
@@ -869,10 +955,10 @@ for (order in fungi){
     l=parameters[i,3]
     costs=paste0("d",d,"_t",t,"_l",l)
     
-    reconciliation <- read.table(paste0("C:/fantine/Nextcloud/Immex_2023/data/data_",dataset,"/recon_",dataset,"_",order,"_",costs,"_output.csv"),sep=",")
+    reconciliation <- read.table(paste0("C:/fantine/Nextcloud/Immex_2023/data/data_",dataset,"/recon_",dataset,"_",order,"_",costs,suffix,"_output.csv"),sep=",")
     cospeciation <- length(reconciliation$V3[reconciliation$V3=="Cospeciation"])/length(reconciliation$V3[reconciliation$V3=="Transfer"]) #indique si l'on a plus d'évenements de co-speciation que de tranferts
     
-    graph <- read.table(paste0("C:/fantine/Nextcloud/Immex_2023/data/data_",dataset,"/pvalue_",dataset,"_",order,"_",costs,"_output.svg"), comment.char = "", fill=TRUE, sep=";")
+    graph <- read.table(paste0("C:/fantine/Nextcloud/Immex_2023/data/data_",dataset,"/pvalue_",dataset,"_",order,"_",costs,suffix,"_output.svg"), comment.char = "", fill=TRUE, sep=";")
     pvalue_empress <- graph$V1[grep("p-value", graph$V1)] #isole la ligne du doc avec la pvalue
     pvalue_empress <- gsub("    <!-- p-value = ", "", pvalue_empress)
     pvalue_empress <- as.numeric(gsub(" -->", "", pvalue_empress)) #isole la pvalue
@@ -882,7 +968,7 @@ for (order in fungi){
     colnames(empress) <- c("Costs","Ratio cospeciation / transfer events","P-value")
   }
   
-  write.table(empress,paste0("C:/fantine/Nextcloud/Immex_2023/results/Empress_",dataset,"_",order,".csv"),sep=";",row.names=FALSE,quote=FALSE)
+  write.table(empress,paste0("C:/fantine/Nextcloud/Immex_2023/results/Empress_",dataset,"_",order,suffix,".csv"),sep=";",row.names=FALSE,quote=FALSE)
 }
 
 ##### Script Sepp #####
@@ -941,6 +1027,7 @@ network <- network[rownames(network) != "Asplenium_ruta-muraria",]
 
 #for global fit methods
 network[network>0] <- 1
+network <- network[, colSums(network) > 0]
 
 # for Empress
 for (j in colnames(network)) {
@@ -953,7 +1040,7 @@ for (j in colnames(network)) {
 network[network>0] <- 1
 
 # building of tree file
-fungi_tree <- read.tree("C:/fantine/Nextcloud/Immex_2023/data/data_global_scale/tree_VT_18S_barcode_PB_LN_GTR_constrained.tre")
+fungi_tree <- read.nexus("C:/fantine/Nextcloud/Immex_2023/data/data_global_scale/tree_VT_18S_barcode_PB_LN_GTR_constrained.tre")
 fungi_tree$tip.label <- gsub("X0000","",fungi_tree$tip.label)
 fungi_tree$tip.label <- gsub("X000","",fungi_tree$tip.label)
 fungi_tree$tip.label <- gsub("X00","",fungi_tree$tip.label)
@@ -983,7 +1070,7 @@ network$"104" <- network$"198"
 network <- network[,!names(network) %in% c("33","34","37","141","162","145","198")]
 
 # building of fungi tree
-fungi_tree <- read.tree("C:/fantine/Nextcloud/Immex_2023/data/data_global_scale/tree_VT_18S_barcode_PB_LN_GTR_constrained.tre")
+fungi_tree <- read.nexus("C:/fantine/Nextcloud/Immex_2023/data/data_global_scale/tree_VT_18S_barcode_PB_LN_GTR_constrained.tre")
 fungi_tree$tip.label <- gsub("VTX0000","",fungi_tree$tip.label)
 fungi_tree$tip.label <- gsub("VTX000","",fungi_tree$tip.label)
 fungi_tree$tip.label <- gsub("VTX00","",fungi_tree$tip.label)
