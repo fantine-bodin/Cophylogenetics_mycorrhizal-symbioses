@@ -1,12 +1,46 @@
-# Cophylogenetics\_mycorrhizal-symbioses
 
-Code for the study "Questioning the Evidence for Host-Symbiont Codiversification in Mycorrhizal Symbioses"
 
-This repository includes the R code used to perform cophylogenetic analyses on the mycorrhizal associations described in Perez et al. 2022 and the R code used to perform cophylogenetic analyses on the mycorrhizal associations described in 12 other studies. Each code has several parts: formatting data, evaluating cophylogenetic signal by performing global-fit methods (parafit and PACo), evaluating phylogenetic congruence by performing the event-based method eMPRess (which requires to format data, to perform it in a Bash script and to recover results). Each part of the code has been applied to each mycorrhizal network.
+Questioning the Evidence for Host–Symbiont Codiversification in Mycorrhizal Symbioses
 
-This repository also includes the Bash code used to assessed phylogenetic congruence with the event-based model eMPRess in the mycorrhizal associations described in Perez et al. 2022 and in the mycorrhizal associations described in 12 other studies. eMPRess reconciles the plant and fungal phylogenetic trees using maximum parsimony to model events of cospeciation, host transfer, duplication, and loss, with a given cost associated to each event. We ran eMPRess with the following costs: 0 for a cospeciation event, 4 for a duplication event, 1 for a loss event, and 1 for a transfer event.
 
-For each mycorrhizal network, if the phylogenetic trees were not already available, we retrieved representative DNA sequences for both plant and mycorrhizal fungi. This repository includes the script used to align them with MAFFT (Katoh, 2002) and trimAl (Capella-Gutiérrez et al., 2009), and reconstruct the phylogenetic tree with IQ-TREE (Nguyen et al., 2015).
 
-This repository also includes data for each network: the tree files of fungi and plants and the associated mycorrhizal network. Most of the trees are denoted by "alignment\_Name\_fungi/plant\_trimal.fasta.treefile" because they have been generated thanks to alignement of fasta sequences with MAFFT and trimAl. Support for the nodes of the trees are included in the treefile files (with a Newick format). The alignments used to reconstruct the trees are also included in the folders. The plant tree called "plant\_tree\_Name" were obtained thanks to V.PhyloMaker2. Some fungi trees are called "tree\_backbone\_Name" because they were improved by a backbone approach. The alignments used for this backbone reconstruction are denoted "alignment\_all\_fungi\_trimal.fasta". The networks are either in csv format or under a format ready for eMPRess analysis ("links\_empress\_Name.txt").
+This repository contains the code and data used in the study "Questioning the Evidence for Host-Symbiont Codiversification in Mycorrhizal Symbioses". It provides all the scripts required to reproduce the cophylogenetic analyses, phylogenetic reconstructions, and associated datasets used throughout the study.
+
+
+
+
+
+\### Available scripts: 
+
+
+
+The repository includes the R scripts used to perform cophylogenetic analyses on the mycorrhizal associations described in 13 published studies. 
+
+
+
+For each mycorrhizal network, the analysis pipeline consists of three main steps. First, the data are formatted to generate the host and fungal phylogenies together with the corresponding association matrices. Second, cophylogenetic signal is assessed using the global-fit methods ParaFit and PACo. Third, phylogenetic congruence is evaluated using the event-based method eMPRess, which requires formatting the input files, running the analyses through Bash scripts, and importing and processing the reconciliation results. The complete workflow was applied independently to every mycorrhizal network included in the study.
+
+
+
+The repository also contains the Bash scripts used to run eMPRess. This software reconstructs the evolutionary history of host and symbiont lineages using a maximum-parsimony framework that models four types of evolutionary events: cospeciation, duplication, host transfer, and loss. Throughout this study, eMPRess was run using an event-cost scheme assigning a cost of 0 to cospeciation, 4 to duplication, and 1 to both host transfer and loss events.
+
+
+
+For mycorrhizal networks for which phylogenetic trees were not already available, representative DNA sequences were retrieved for both plant hosts and fungal symbionts. The repository includes the scripts used to align these sequences with MAFFT, trim the alignments with trimAl, and reconstruct phylogenetic trees with IQ-TREE.
+
+
+
+
+
+\### Available data: 
+
+
+
+The repository also contains the data associated with each mycorrhizal network, including the plant and fungal phylogenetic trees and the corresponding host-symbiont association matrices. Most reconstructed phylogenies are provided as files named `alignment\_<Name>\_plant\_trimal.fasta.treefile` or `alignment\_<Name>\_fungi\_trimal.fasta.treefile`. These files are in \*\*Newick format and include branch support values\*\*. 
+
+The sequence alignments used for phylogenetic reconstruction are also provided. Plant phylogenies named `plant\_tree\_<Name>` were generated using V.PhyloMaker2, whereas some fungal phylogenies, named `tree\_backbone\_<Name>`, were refined using a backbone-based approach. The alignments used for these backbone reconstructions are provided as `alignment\_all\_fungi\_trimal.fasta`. Finally, the host-symbiont association data are available either as CSV files or as eMPRess-formatted files named `links\_empress\_<Name>.txt`.
+
+
+
+
 
