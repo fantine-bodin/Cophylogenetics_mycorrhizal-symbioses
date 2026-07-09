@@ -1,4 +1,4 @@
-## Questioning the Evidence for Host–Symbiont Codiversification in Mycorrhizal Symbioses
+# Questioning the Evidence for Host–Symbiont Codiversification in Mycorrhizal Symbioses
 
 
 
@@ -8,7 +8,7 @@ This repository contains the code and data used in the study "Questioning the Ev
 
 
 
-# Available scripts: 
+### Available scripts: 
 
 
 
@@ -30,7 +30,7 @@ For mycorrhizal networks for which phylogenetic trees were not already available
 
 
 
-# Available data: 
+### Available data: 
 
 
 
